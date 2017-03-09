@@ -48,7 +48,7 @@ uint32_t gearPeg1 = blue;
 uint32_t gearPeg2 = lblue;
 
 
-int threshold = 180; //threshold for the analog peg-detecting sensors
+int threshold = 230; //threshold for the analog peg-detecting sensors
 int gearSensorBuffer = 15; //buffer for the gear sensors
                            //higher values make less flicker, more delay
 int gearBufferState1 = 0; //initialize both sensors' buffers
@@ -66,8 +66,8 @@ const int sensorCount = 6; //number of sensors
 const int analogInPins[] = {A0, A1, A2, A3, A4, A5};
 uint32_t sensorSums[sensorCount];
 
-const int sensorReadingCount = 50;
-uint16_t pegSensorReadings[sensorCount][sensorReadingCount];
+const int sensorReadingCount = 20;
+uint32_t pegSensorReadings[sensorCount][sensorReadingCount];
 int sensorIndex = 0;
 
 boolean pegIn = false;
@@ -151,7 +151,7 @@ void readSensors() {
       gearBufferState1--;
     }
   }
-  if (digitalRead(7) == 0) {
+  if (digitalRead(3) == 0) {
     if (gearBufferState2 < gearSensorBuffer) {
       gearBufferState2++;
     }
@@ -169,9 +169,13 @@ void readSensors() {
   for (int i = 0; i < sensorCount; i++) {
     pegSensorReadings[i][sensorIndex] = analogRead(analogInPins[i]);
     //Serial.print(pegSensorReadings[i][sensorIndex]); Serial.print('\t');
-    sensorIndex = (sensorIndex + 1) % sensorReadingCount;
     sensorSums[i] = findAverage(pegSensorReadings[i]);
   }
+  sensorIndex++;
+  if (sensorIndex == sensorReadingCount) {
+      sensorIndex = 0;
+    }
+  //sensorSums[1] *= 2.5;
   for (int i = 0; i < sensorCount; i++) {
     //Serial.print(sensorSums[i]); Serial.print('\t');
   }
@@ -201,7 +205,7 @@ uint32_t maxValue( uint32_t myArray[], int size) {
     return maxValue;
 }
 
-uint16_t findAverage(uint16_t input[]) {
+uint32_t findAverage(uint32_t input[]) {
   uint32_t sum = 0;
   for (int i = 0; i < sensorReadingCount; i++) {
     sum += input[i];
